@@ -1,27 +1,6 @@
 """
 Reddit-Trend-Detector Kinesis Producer (Reddit Comments dataset)
 -------------------------------------------------------------------
-Reads reddit_sample.csv (a slice of the "May 2015 Reddit Comments" dataset,
-pulled via SQL from the full 31GB Pushshift SQLite database) and streams
-each comment into AWS Kinesis Data Streams as a JSON record, at a
-configurable rate -- simulating a continuous live comment feed.
-
-IMPORTANT: unlike the earlier Apache-log producer, this file is genuine CSV
-with a header row, and some `body` fields contain embedded newlines (a
-multi-line comment, still inside one quoted CSV field). We MUST use
-Python's csv module (not naive line-splitting or regex) so multi-line
-comments are parsed as a single record, not split into garbage extra rows.
-
-Columns in reddit_sample.csv: subreddit, body, created_utc, score, author
-
-Usage:
-    pip install boto3 --user
-    python3 02_producer.py --file reddit_sample.csv --stream server-pulse-stream --rate 20
-
-    --rate 20       -> ~20 records/second (raise this to stress-test for benchmarking)
-    --loop          -> keep replaying the file forever (good for long demo recordings)
-    --jitter 0.3    -> +/-30% random variation in send timing, so it doesn't look
-                       like a metronome in the demo
 """
 import argparse
 import csv
@@ -31,10 +10,36 @@ import sys
 import time
 from datetime import datetime, timezone
 
+import io
+from urllib.parse import urlparse
+
 import boto3
 
 csv.field_size_limit(10_000_000)  # some comment bodies can be unusually long
 
+def open_input_file(filepath, region):
+    if filepath.startswith("s3://"):
+        parsed = urlparse(filepath)
+
+        s3 = boto3.client("s3", region_name=region)
+
+        obj = s3.get_object(
+            Bucket=parsed.netloc,
+            Key=parsed.path.lstrip("/")
+        )
+
+        return io.TextIOWrapper(
+            obj["Body"],
+            encoding="utf-8",
+            errors="replace"
+        )
+
+    return open(
+        filepath,
+        newline="",
+        encoding="utf-8",
+        errors="replace"
+    )
 
 def parse_args():
     p = argparse.ArgumentParser(description="Replay Reddit comments CSV into Kinesis at a controlled rate")
@@ -86,11 +91,12 @@ def stream_records(filepath, stream_name, region, rate, loop, jitter, max_record
     skipped = 0
 
     while True:
-        with open(filepath, newline="", encoding="utf-8", errors="replace") as f:
+        with open_input_file(filepath, region) as f:
             reader = csv.DictReader(f)  # correctly handles embedded newlines in quoted fields
             for row in reader:
                 if max_records and sent >= max_records:
                     print(f"[producer] reached --max-records={max_records}, stopping.", file=sys.stderr)
+                    print(f"sent={sent}, skipped={skipped}", file=sys.stderr)
                     return
 
                 try:
