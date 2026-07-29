@@ -42,7 +42,7 @@ def parse_args():
 
 
 def run_athena_query(query, region):
-    """Run a query against Athena and return rows as a list of dicts."""
+    """Running a query against Athena and return rows as a list of dicts."""
     athena = boto3.client("athena", region_name=region)
 
     response = athena.start_query_execution(
@@ -75,7 +75,7 @@ def run_athena_query(query, region):
 
 
 def get_baseline(min_baseline_comments, region):
-    """Fetch the historical baseline (avg comments/hour) per subreddit from Athena."""
+    """Fetching the historical baseline (avg comments/hour) per subreddit from Athena."""
     query = f"""
         SELECT subreddit, total_comments, avg_comments_per_hour
         FROM {ATHENA_TABLE}
@@ -92,7 +92,7 @@ def get_baseline(min_baseline_comments, region):
 
 
 def get_live_counts(region):
-    """Fetch the most recent window's live comment counts per subreddit from DynamoDB."""
+    """Fetching the most recent window's live comment counts per subreddit from DynamoDB."""
     dynamodb = boto3.resource("dynamodb", region_name=region)
     table = dynamodb.Table(DYNAMODB_TABLE)
 
