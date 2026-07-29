@@ -1,0 +1,33 @@
+{
+  "generated_at": "2025-07-30 10:30 UTC",
+  "historical_subreddits": 574,
+  "live_subreddits": 255,
+  "trending_count": 2,
+  "threshold": 2.0,
+  "results": [
+    {
+      "subreddit": "INTP",
+      "current_5min": 4,
+      "current_per_hour": 48,
+      "baseline_per_hour": 21.6,
+      "ratio": 2.22,
+      "status": "TRENDING"
+    },
+    {
+      "subreddit": "crusadersquest",
+      "current_5min": 4,
+      "current_per_hour": 48,
+      "baseline_per_hour": 24,
+      "ratio": 2.0,
+      "status": "TRENDING"
+    },
+    {
+      "subreddit": "AskReddit",
+      "current_5min": 72,
+      "current_per_hour": 864,
+      "baseline_per_hour": 5267,
+      "ratio": 0.16,
+      "status": "NORMAL"
+    }
+  ]
+}
