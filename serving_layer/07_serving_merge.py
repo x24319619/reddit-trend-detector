@@ -387,7 +387,16 @@ def save_results(merged_results, baseline, live_counts, trending, threshold):
         "results": merged_results
     }
 
-    os.makedirs("../dashboard/data", exist_ok=True)
+
+    DASHBOARD_FILE = "/home/ec2-user/reddit-trend-detector/dashboard/data/latest_results.json"
+
+    os.makedirs(
+        "/home/ec2-user/reddit-trend-detector/dashboard/data",
+        exist_ok=True
+    )
+
+    with open(DASHBOARD_FILE, "w") as f:
+        json.dump(output, f, indent=4)
 
     with open("../dashboard/data/latest_results.json", "w") as f:
         json.dump(output, f, indent=4)
