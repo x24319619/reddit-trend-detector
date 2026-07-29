@@ -29,7 +29,9 @@ Optional arguments:
         Trending threshold expressed as a multiple of the historical
         average (default = 2.0).
 """
-
+import json
+import os
+from datetime import datetime
 import argparse
 import time
 
@@ -363,6 +365,35 @@ def main():
 
     print("=" * 30)
 
+    save_results(
+        merged_results,
+        baseline,
+        live_counts,
+        trending,
+        args.trend_threshold
+    )
+
+def save_results(merged_results, baseline, live_counts, trending, threshold):
+    """
+    Save the merged results for the Streamlit dashboard.
+    """
+
+    output = {
+        "generated_at": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC"),
+        "historical_subreddits": len(baseline),
+        "live_subreddits": len(live_counts),
+        "trending_count": len(trending),
+        "threshold": threshold,
+        "results": merged_results
+    }
+
+    os.makedirs("../dashboard/data", exist_ok=True)
+
+    with open("../dashboard/data/latest_results.json", "w") as f:
+        json.dump(output, f, indent=4)
+
+    print("\nDashboard data updated.")
 
 if __name__ == "__main__":
     main()
+
