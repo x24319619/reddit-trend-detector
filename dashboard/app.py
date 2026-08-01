@@ -46,12 +46,16 @@ h1,h2,h3{
     padding:15px;
 }
 
-div[data-testid="stMetricValue"]{
-    color:white;
+[data-testid="stMetricLabel"] p{
+    color:white !important;
+    font-size:18px !important;
+    font-weight:700 !important;
 }
 
-div[data-testid="stMetricLabel"]{
-    color:#cbd5e1;
+[data-testid="stMetricValue"]{
+    color:white !important;
+    font-size:40px !important;
+    font-weight:700 !important;
 }
 
 </style>
@@ -78,47 +82,35 @@ df = pd.DataFrame(data["results"])
 # ---------------------------------------------------
 
 st.markdown("""
-#  Reddit Trend Detector Dashboard
+<h1>📈 Reddit Trend Detector Dashboard</h1>
 
-""")
+<h3 style="color:white;font-size:24px;">
+
+</h3>
+""", unsafe_allow_html=True)
 
 st.caption(f"Last Updated: {data['generated_at']}")
 
-st.markdown("---")
+st.divider()
 
 # ---------------------------------------------------
-# Summary Cards
+# Metrics
 # ---------------------------------------------------
 
 c1, c2, c3, c4 = st.columns(4)
 
-c1.metric(
-    " Historical",
-    data["historical_subreddits"]
-)
+c1.metric("Historical", data["historical_subreddits"])
+c2.metric("Live", data["live_subreddits"])
+c3.metric("Trending", data["trending_count"])
+c4.metric("Threshold", f"{data['threshold']}×")
 
-c2.metric(
-    " Live",
-    data["live_subreddits"]
-)
-
-c3.metric(
-    " Trending",
-    data["trending_count"]
-)
-
-c4.metric(
-    " Threshold",
-    f"{data['threshold']}×"
-)
-
-st.markdown("---")
+st.divider()
 
 # ---------------------------------------------------
 # Trending Table
 # ---------------------------------------------------
 
-st.subheader(" Trending Subreddits")
+st.markdown("##  Trending Subreddits")
 
 trending = df[df["status"] == "TRENDING"]
 
@@ -132,7 +124,7 @@ else:
             "current_per_hour",
             "baseline_per_hour",
             "ratio",
-            "status"
+            "status",
         ]
     ].sort_values(
         "ratio",
@@ -142,7 +134,7 @@ else:
     st.dataframe(
         display,
         use_container_width=True,
-        hide_index=True
+        hide_index=True,
     )
 
 # ---------------------------------------------------
@@ -152,12 +144,12 @@ else:
 left, right = st.columns(2)
 
 # ---------------------------------------------------
-# Top Ratios
+# Ratio Chart
 # ---------------------------------------------------
 
 with left:
 
-    st.subheader(" Top Activity Ratios")
+    st.markdown("##  Top Activity Ratios")
 
     top = df.sort_values(
         "ratio",
@@ -171,27 +163,26 @@ with left:
         orientation="h",
         color="status",
         text="ratio",
-        title="Current Activity / Historical Baseline"
+        title="Current Activity / Historical Baseline",
     )
 
     fig.update_layout(
-        height=500,
+        template="plotly_dark",
+        height=520,
+        font=dict(size=15),
+        title_font_size=22,
         yaxis=dict(categoryorder="total ascending"),
-        template="plotly_dark"
     )
 
-    st.plotly_chart(
-        fig,
-        use_container_width=True
-    )
+    st.plotly_chart(fig, use_container_width=True)
 
 # ---------------------------------------------------
-# Current vs Baseline
+# Current vs Historical
 # ---------------------------------------------------
 
 with right:
 
-    st.subheader(" Current vs Historical")
+    st.markdown("##  Current vs Historical")
 
     compare = top.copy()
 
@@ -201,7 +192,7 @@ with right:
         go.Bar(
             name="Current/hr",
             x=compare["subreddit"],
-            y=compare["current_per_hour"]
+            y=compare["current_per_hour"],
         )
     )
 
@@ -209,30 +200,29 @@ with right:
         go.Bar(
             name="Baseline/hr",
             x=compare["subreddit"],
-            y=compare["baseline_per_hour"]
+            y=compare["baseline_per_hour"],
         )
     )
 
     fig2.update_layout(
         barmode="group",
-        height=500,
-        template="plotly_dark"
+        template="plotly_dark",
+        height=520,
+        font=dict(size=15),
+        title_font_size=22,
     )
 
-    st.plotly_chart(
-        fig2,
-        use_container_width=True
-    )
+    st.plotly_chart(fig2, use_container_width=True)
 
 # ---------------------------------------------------
-# Pie + Gauge
+# Pie & Gauge
 # ---------------------------------------------------
 
 left, right = st.columns(2)
 
 with left:
 
-    st.subheader(" Activity Status")
+    st.markdown("##  Activity Status")
 
     status_counts = (
         df["status"]
@@ -242,29 +232,30 @@ with left:
 
     status_counts.columns = [
         "status",
-        "count"
+        "count",
     ]
 
     pie = px.pie(
         status_counts,
         names="status",
         values="count",
-        hole=0.45
+        hole=0.45,
     )
 
     pie.update_layout(
         template="plotly_dark",
-        height=450
+        height=480,
+        font=dict(size=15),
     )
 
     st.plotly_chart(
         pie,
-        use_container_width=True
+        use_container_width=True,
     )
 
 with right:
 
-    st.subheader(" Trending Gauge")
+    st.markdown("##  Trending Gauge")
 
     gauge = go.Figure(
         go.Indicator(
@@ -278,28 +269,29 @@ with right:
                     {"range": [0, 5], "color": "#22c55e"},
                     {"range": [5, 10], "color": "#eab308"},
                     {"range": [10, 20], "color": "#ef4444"},
-                ]
-            }
+                ],
+            },
         )
     )
 
     gauge.update_layout(
         template="plotly_dark",
-        height=450
+        height=480,
+        font=dict(size=15),
     )
 
     st.plotly_chart(
         gauge,
-        use_container_width=True
+        use_container_width=True,
     )
 
 # ---------------------------------------------------
 # System Health
 # ---------------------------------------------------
 
-st.markdown("---")
+st.divider()
 
-st.subheader(" System Health")
+st.markdown("##  System Health")
 
 h1, h2 = st.columns(2)
 
@@ -317,7 +309,7 @@ with h2:
 # Footer
 # ---------------------------------------------------
 
-st.markdown("---")
+st.divider()
 
 st.caption(f"""
 **Source:** Athena + DynamoDB Serving Layer Merge
