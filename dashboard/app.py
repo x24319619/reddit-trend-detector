@@ -80,7 +80,6 @@ df = pd.DataFrame(data["results"])
 st.markdown("""
 #  Reddit Trend Detector Dashboard
 
-### Lambda Architecture • Athena • DynamoDB • Kinesis • Streamlit
 """)
 
 st.caption(f"Last Updated: {data['generated_at']}")
