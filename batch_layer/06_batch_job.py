@@ -32,7 +32,7 @@ def parse_args():
 def main():
     args = parse_args()
 
-    spark = SparkSession.builder.appName("edditTrendDetector-BatchLayer").getOrCreate()
+    spark = SparkSession.builder.appName("redditTrendDetector-BatchLayer").getOrCreate()
 
     raw = (
         spark.read
